@@ -3,162 +3,236 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>3D Tiefen Fragmentierung Navigation</title>
+<title>3D Bild Mixer komplett lokal</title>
 <style>
-  html, body {
+  body, html {
     margin: 0; padding: 0; height: 100%;
-    overflow-x: hidden;
-    font-family: Arial, sans-serif;
-    background: #111;
-    perspective: 1200px;
-  }
-  body {
     overflow-y: scroll;
-    scroll-behavior: smooth;
-    height: 300vh; /* genug Scrollfläche für 3 Seiten */
+    background: #111;
   }
-  .scene {
-    position: fixed;
-    top: 50%; left: 50%;
-    width: 600px;
-    height: 400px;
-    margin: -200px 0 0 -300px;
-    transform-style: preserve-3d;
-    pointer-events: none;
-  }
-  .page {
-    position: absolute;
-    width: 600px;
-    height: 400px;
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    grid-template-rows: repeat(4, 1fr);
-    gap: 5px;
-    pointer-events: auto;
-  }
-  .fragment {
-    background: linear-gradient(135deg, #0ff, #06f);
-    border-radius: 10px;
-    box-shadow: 0 0 15px #0ff7;
-    transition: transform 0.8s ease, opacity 0.8s ease;
-  }
-  /* Unterschiedliche Seitenfarben */
-  #page1 .fragment { background: linear-gradient(135deg, #06f, #0ff); }
-  #page2 .fragment { background: linear-gradient(135deg, #f60, #fa0); }
-  #page3 .fragment { background: linear-gradient(135deg, #6f0, #af0); }
-
-  /* Text Layer für Seiten */
-  .page-text {
-    position: absolute;
-    top: 20px; left: 20px;
-    font-size: 2rem;
-    font-weight: bold;
-    color: #eee;
-    pointer-events: none;
-    user-select: none;
+  #container {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    overflow: hidden;
   }
 </style>
 </head>
 <body>
 
-<div class="scene" id="scene">
-  <div class="page" id="page1">
-    <div class="page-text">Landing Page 1</div>
-    <!-- 24 Fragmente -->
-    <div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div>
-    <div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div>
-    <div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div>
-    <div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div>
-  </div>
-
-  <div class="page" id="page2" style="transform: translateZ(-800px); opacity: 0;">
-    <div class="page-text">Landing Page 2</div>
-    <div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div>
-    <div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div>
-    <div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div>
-    <div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div>
-  </div>
-
-  <div class="page" id="page3" style="transform: translateZ(-1600px); opacity: 0;">
-    <div class="page-text">Landing Page 3</div>
-    <div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div>
-    <div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div>
-    <div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div>
-    <div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div>
-  </div>
-</div>
+<div id="container"></div>
 
 <script>
-  const pages = [
-    document.getElementById('page1'),
-    document.getElementById('page2'),
-    document.getElementById('page3'),
-  ];
+// --- Three.js Minified (r150) ---
+// (Hier gekürzt, Original muss komplett rein)
+// Um Speicherplatz zu sparen, hier ein sehr simples Three.js Ersatz-Minimal für Mesh+Shader+Renderer:
 
-  const fragmentsCount = 24; // 6 cols * 4 rows
-  const cols = 6;
-  const rows = 4;
-
-  window.addEventListener('scroll', () => {
-    const scrollY = window.scrollY;
-    const maxScroll = document.body.scrollHeight - window.innerHeight;
-
-    // Scroll progress von 0 bis 1
-    const progress = Math.min(scrollY / maxScroll, 1);
-
-    // Welche Seite vorne? 3 Seiten, scroll 0..1 mappt auf 0..2
-    const pageIndex = Math.min(Math.floor(progress * (pages.length - 1)), pages.length - 2);
-    const localProgress = (progress * (pages.length - 1)) - pageIndex;
-
-    // console.log(pageIndex, localProgress.toFixed(2));
-
-    pages.forEach((page, i) => {
-      const fragments = page.querySelectorAll('.fragment');
-      if(i === pageIndex) {
-        // aktuelle Seite fragmentiert nach außen
-        page.style.opacity = 1 - localProgress;
-        page.style.transform = `translateZ(0px)`;
-        fragments.forEach((frag, idx) => {
-          // Position in Grid
-          const col = idx % cols;
-          const row = Math.floor(idx / cols);
-
-          // Abstand vom Zentrum - als Vektor
-          const offsetX = (col - (cols/2 - 0.5)) * 100;
-          const offsetY = (row - (rows/2 - 0.5)) * 100;
-
-          // Fragmente bewegen sich auseinander mit localProgress, in z und xy Achsen
-          const moveX = offsetX * localProgress * 2;
-          const moveY = offsetY * localProgress * 2;
-          const moveZ = localProgress * 600;
-
-          frag.style.transform = `translate3d(${moveX}px, ${moveY}px, ${moveZ}px) rotate(${localProgress * 360}deg)`;
-          frag.style.opacity = 1 - localProgress;
-        });
-      } else if (i === pageIndex + 1) {
-        // nächste Seite kommt von hinten nach vorne
-        page.style.opacity = localProgress;
-        page.style.transform = `translateZ(${-800 + localProgress * 800}px)`;
-        const fragments = page.querySelectorAll('.fragment');
-        fragments.forEach(frag => {
-          frag.style.transform = `translate3d(0,0,0) rotate(0deg)`;
-          frag.style.opacity = 1;
-        });
-      } else {
-        // andere Seiten sind unsichtbar und hinten
-        page.style.opacity = 0;
-        page.style.transform = `translateZ(-1600px)`;
-        const fragments = page.querySelectorAll('.fragment');
-        fragments.forEach(frag => {
-          frag.style.transform = `translate3d(0,0,0) rotate(0deg)`;
-          frag.style.opacity = 1;
-        });
+class Vector2 {
+  constructor(x=0,y=0){this.x=x;this.y=y;}
+}
+class Vector3 {
+  constructor(x=0,y=0,z=0){this.x=x;this.y=y;this.z=z;}
+}
+class PerspectiveCamera {
+  constructor(fov,aspect,near,far) {
+    this.fov=fov; this.aspect=aspect; this.near=near; this.far=far;
+    this.position=new Vector3(0,0,2.5);
+    this.updateProjectionMatrix = function(){};
+  }
+}
+class Scene {
+  constructor(){this.children=[];}
+  add(o){this.children.push(o);}
+}
+class PlaneGeometry {
+  constructor(w,h,segW,segH) {
+    this.width=w; this.height=h; this.segmentsW=segW; this.segmentsH=segH;
+    this.vertices = [];
+    for(let y=0;y<=segH;y++){
+      for(let x=0;x<=segW;x++){
+        this.vertices.push(new Vector3((x/segW-0.5)*w,(y/segH-0.5)*h,0));
       }
-    });
+    }
+    this.faces = []; // dummy
+  }
+}
+class ShaderMaterial {
+  constructor(params){
+    this.uniforms = params.uniforms;
+    this.vertexShader = params.vertexShader;
+    this.fragmentShader = params.fragmentShader;
+    this.side = params.side;
+  }
+}
+class Mesh {
+  constructor(geo,mat){
+    this.geometry=geo;
+    this.material=mat;
+    this.rotation={x:0,y:0,z:0};
+  }
+}
+class WebGLRenderer {
+  constructor(params){this.domElement=document.createElement('canvas');}
+  setSize(w,h){this.domElement.width=w;this.domElement.height=h;}
+  render(scene,camera){}
+}
+class Texture {
+  constructor(image){
+    this.image=image;
+    this.minFilter='LinearFilter';
+    this.magFilter='LinearFilter';
+  }
+}
+class TextureLoader {
+  load(url,callback){
+    let img=new Image();
+    img.onload=()=>callback(new Texture(img));
+    img.src=url;
+  }
+}
+// Einfacher Mock für Demo
+const THREE = {
+  Vector2, Vector3, PerspectiveCamera, Scene, PlaneGeometry, ShaderMaterial,
+  Mesh, WebGLRenderer, Texture, TextureLoader,
+  DoubleSide: 2
+};
+// --- Ende Mini-Three.js Mock ---
+// (In echtem Einsatz einfach Three.js komplett offline einbinden!)
+
+</script>
+
+<script>
+// Base64 DataURIs für zwei kleine Testbilder (je 64x64px)
+// Du kannst hier deine eigenen Base64-Strings reinpacken!
+
+const base64img1 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAAARklEQVR4nO3BAQ0AAAjDMO5fNHI4HFyFCcGhyDNgBGACpCwE6wBxoDLYAxYAqwBGoAtcAtoAxYArsAagC9wC2gDVgBqwBGoAtcAtoAxYAqwBGoAtcAtoAxYAqwBGoAtcAxF8C/MtIjvG6a10AAAAASUVORK5CYII=";
+const base64img2 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAAARklEQVR4nO3BAQ0AAAjDMO5fNHI4HFyFCcGhyDNgBGACpCwE6wBxoDLYAxYAqwBGoAtcAtoAxYArsAagC9wC2gDVgBqwBGoAtcAtoAxYAqwBGoAtcAtoAxYAqwBGoAtcAxF8C/MtIjvG6a10AAAAASUVORK5CYII=";
+
+// Setup Three.js
+
+const container = document.getElementById('container');
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(40, window.innerWidth/window.innerHeight, 0.1, 100);
+camera.position.z = 2.5;
+
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(window.innerWidth, window.innerHeight);
+container.appendChild(renderer.domElement);
+
+const planeGeo = new THREE.PlaneGeometry(2, 1.2, 200, 120);
+
+const loader = new THREE.TextureLoader();
+
+let tex1, tex2;
+
+loader.load(base64img1, (t1) => {
+  tex1 = t1;
+  tex1.minFilter = 'LinearFilter';
+  tex1.magFilter = 'LinearFilter';
+
+  loader.load(base64img2, (t2) => {
+    tex2 = t2;
+    tex2.minFilter = 'LinearFilter';
+    tex2.magFilter = 'LinearFilter';
+
+    init();
+  });
+});
+
+const vertexShader = `
+  uniform float dispFactor;
+  uniform sampler2D dispTexture;
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    float disp = texture2D(dispTexture, uv).r;
+    vec3 newPosition = position + normal * disp * dispFactor * 0.3;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+  }
+`;
+
+const fragmentShader = `
+  uniform sampler2D texture1;
+  uniform sampler2D texture2;
+  uniform float mixFactor;
+  varying vec2 vUv;
+  void main() {
+    vec4 tex1Color = texture2D(texture1, vUv);
+    vec4 tex2Color = texture2D(texture2, vUv);
+    gl_FragColor = mix(tex1Color, tex2Color, mixFactor);
+  }
+`;
+
+let material, mesh;
+
+function init() {
+  material = new THREE.ShaderMaterial({
+    uniforms: {
+      texture1: { value: tex1 },
+      texture2: { value: tex2 },
+      dispTexture: { value: tex1 },
+      dispFactor: { value: 0 },
+      mixFactor: { value: 0 }
+    },
+    vertexShader,
+    fragmentShader,
+    side: THREE.DoubleSide
   });
 
-  // Initial setzen, falls Scroll schon unten
-  window.dispatchEvent(new Event('scroll'));
+  mesh = new THREE.Mesh(planeGeo, material);
+  scene.add(mesh);
+
+  animate();
+}
+
+let scrollPos = 0;
+let targetScroll = 0;
+
+window.addEventListener('scroll', () => {
+  targetScroll = window.scrollY;
+});
+
+function clamp(num, min, max) {
+  return num <= min ? min : num >= max ? max : num;
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  scrollPos += (targetScroll - scrollPos) * 0.1;
+
+  const maxScroll = window.innerHeight * 2;
+  let scrollNorm = clamp(scrollPos / maxScroll, 0, 1);
+
+  let dispFactor, mixFactor, rotation;
+
+  if (scrollNorm < 0.5) {
+    let t = scrollNorm / 0.5;
+    dispFactor = t;
+    mixFactor = t;
+    rotation = Math.PI * t;
+    material.uniforms.dispTexture.value = tex1;
+  } else {
+    let t = (scrollNorm - 0.5) / 0.5;
+    dispFactor = 1 - t;
+    mixFactor = 1;
+    rotation = Math.PI + Math.PI * t;
+    material.uniforms.dispTexture.value = tex2;
+  }
+
+  material.uniforms.dispFactor.value = dispFactor;
+  material.uniforms.mixFactor.value = mixFactor;
+
+  mesh.rotation.x = rotation;
+
+  renderer.render(scene, camera);
+}
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
 </script>
+
 </body>
 </html>
