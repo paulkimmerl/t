@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tiefen-Fragmentierung 3D Scroll</title>
+<style>
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    overflow-x: hidden;
+    background: #111;
+    font-family: Arial, sans-serif;
+    perspective: 1200px;
+  }
+  body {
+    overflow-y: scroll;
+    scroll-behavior: smooth;
+  }
+  .container {
+    position: relative;
+    height: 300vh; /* genug Scrollhöhe */
+    width: 100vw;
+    overflow: visible;
+  }
+  .fragment-layer {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform-style: preserve-3d;
+    transform-origin: center center;
+    width: 300px; height: 300px;
+    margin: -150px 0 0 -150px;
+    pointer-events: none;
+  }
+  .fragment {
+    position: absolute;
+    width: 80px; height: 80px;
+    background: linear-gradient(135deg, #06f, #0ff);
+    border-radius: 15px;
+    box-shadow: 0 0 15px #0ffaaabb;
+    opacity: 0.85;
+    pointer-events: auto;
+    transition: background 0.3s;
+  }
+  .fragment:hover {
+    background: linear-gradient(135deg, #0ff, #06f);
+    box-shadow: 0 0 25px #06ffffcc;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="fragment-layer" id="layer1">
+      <div class="fragment" style="top: 10px; left: 20px;"></div>
+      <div class="fragment" style="top: 120px; left: 30px;"></div>
+      <div class="fragment" style="top: 60px; left: 150px;"></div>
+    </div>
+    <div class="fragment-layer" id="layer2">
+      <div class="fragment" style="top: 40px; left: 60px;"></div>
+      <div class="fragment" style="top: 160px; left: 110px;"></div>
+      <div class="fragment" style="top: 100px; left: 190px;"></div>
+    </div>
+    <div class="fragment-layer" id="layer3">
+      <div class="fragment" style="top: 70px; left: 30px;"></div>
+      <div class="fragment" style="top: 180px; left: 90px;"></div>
+      <div class="fragment" style="top: 130px; left: 160px;"></div>
+    </div>
+  </div>
+
+<script>
+  // Zugriff auf Layer
+  const layer1 = document.getElementById('layer1');
+  const layer2 = document.getElementById('layer2');
+  const layer3 = document.getElementById('layer3');
+
+  window.addEventListener('scroll', () => {
+    const scrollY = window.scrollY;
+
+    // Verschiebe Layer mit unterschiedlicher Geschwindigkeit in z-Achse (tiefe)
+    // Layer 1: am tiefsten, Layer 3: am nahesten
+    layer1.style.transform = `translate3d(-50%, -50%, ${scrollY * 0.5}px)`;
+    layer2.style.transform = `translate3d(-50%, -50%, ${scrollY * 0.2}px)`;
+    layer3.style.transform = `translate3d(-50%, -50%, ${scrollY * -0.3}px)`;
+  });
+</script>
+</body>
+</html>
