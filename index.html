@@ -3,85 +3,162 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Tiefen-Fragmentierung 3D Scroll</title>
+<title>3D Tiefen Fragmentierung Navigation</title>
 <style>
   html, body {
     margin: 0; padding: 0; height: 100%;
     overflow-x: hidden;
-    background: #111;
     font-family: Arial, sans-serif;
+    background: #111;
     perspective: 1200px;
   }
   body {
     overflow-y: scroll;
     scroll-behavior: smooth;
+    height: 300vh; /* genug Scrollfläche für 3 Seiten */
   }
-  .container {
-    position: relative;
-    height: 300vh; /* genug Scrollhöhe */
-    width: 100vw;
-    overflow: visible;
-  }
-  .fragment-layer {
+  .scene {
     position: fixed;
     top: 50%; left: 50%;
+    width: 600px;
+    height: 400px;
+    margin: -200px 0 0 -300px;
     transform-style: preserve-3d;
-    transform-origin: center center;
-    width: 300px; height: 300px;
-    margin: -150px 0 0 -150px;
     pointer-events: none;
   }
-  .fragment {
+  .page {
     position: absolute;
-    width: 80px; height: 80px;
-    background: linear-gradient(135deg, #06f, #0ff);
-    border-radius: 15px;
-    box-shadow: 0 0 15px #0ffaaabb;
-    opacity: 0.85;
+    width: 600px;
+    height: 400px;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 5px;
     pointer-events: auto;
-    transition: background 0.3s;
   }
-  .fragment:hover {
+  .fragment {
     background: linear-gradient(135deg, #0ff, #06f);
-    box-shadow: 0 0 25px #06ffffcc;
-    cursor: pointer;
+    border-radius: 10px;
+    box-shadow: 0 0 15px #0ff7;
+    transition: transform 0.8s ease, opacity 0.8s ease;
+  }
+  /* Unterschiedliche Seitenfarben */
+  #page1 .fragment { background: linear-gradient(135deg, #06f, #0ff); }
+  #page2 .fragment { background: linear-gradient(135deg, #f60, #fa0); }
+  #page3 .fragment { background: linear-gradient(135deg, #6f0, #af0); }
+
+  /* Text Layer für Seiten */
+  .page-text {
+    position: absolute;
+    top: 20px; left: 20px;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #eee;
+    pointer-events: none;
+    user-select: none;
   }
 </style>
 </head>
 <body>
-  <div class="container">
-    <div class="fragment-layer" id="layer1">
-      <div class="fragment" style="top: 10px; left: 20px;"></div>
-      <div class="fragment" style="top: 120px; left: 30px;"></div>
-      <div class="fragment" style="top: 60px; left: 150px;"></div>
-    </div>
-    <div class="fragment-layer" id="layer2">
-      <div class="fragment" style="top: 40px; left: 60px;"></div>
-      <div class="fragment" style="top: 160px; left: 110px;"></div>
-      <div class="fragment" style="top: 100px; left: 190px;"></div>
-    </div>
-    <div class="fragment-layer" id="layer3">
-      <div class="fragment" style="top: 70px; left: 30px;"></div>
-      <div class="fragment" style="top: 180px; left: 90px;"></div>
-      <div class="fragment" style="top: 130px; left: 160px;"></div>
-    </div>
+
+<div class="scene" id="scene">
+  <div class="page" id="page1">
+    <div class="page-text">Landing Page 1</div>
+    <!-- 24 Fragmente -->
+    <div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div>
+    <div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div>
+    <div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div>
+    <div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div>
   </div>
 
+  <div class="page" id="page2" style="transform: translateZ(-800px); opacity: 0;">
+    <div class="page-text">Landing Page 2</div>
+    <div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div>
+    <div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div>
+    <div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div>
+    <div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div>
+  </div>
+
+  <div class="page" id="page3" style="transform: translateZ(-1600px); opacity: 0;">
+    <div class="page-text">Landing Page 3</div>
+    <div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div>
+    <div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div>
+    <div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div>
+    <div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div><div class="fragment"></div>
+  </div>
+</div>
+
 <script>
-  // Zugriff auf Layer
-  const layer1 = document.getElementById('layer1');
-  const layer2 = document.getElementById('layer2');
-  const layer3 = document.getElementById('layer3');
+  const pages = [
+    document.getElementById('page1'),
+    document.getElementById('page2'),
+    document.getElementById('page3'),
+  ];
+
+  const fragmentsCount = 24; // 6 cols * 4 rows
+  const cols = 6;
+  const rows = 4;
 
   window.addEventListener('scroll', () => {
     const scrollY = window.scrollY;
+    const maxScroll = document.body.scrollHeight - window.innerHeight;
 
-    // Verschiebe Layer mit unterschiedlicher Geschwindigkeit in z-Achse (tiefe)
-    // Layer 1: am tiefsten, Layer 3: am nahesten
-    layer1.style.transform = `translate3d(-50%, -50%, ${scrollY * 0.5}px)`;
-    layer2.style.transform = `translate3d(-50%, -50%, ${scrollY * 0.2}px)`;
-    layer3.style.transform = `translate3d(-50%, -50%, ${scrollY * -0.3}px)`;
+    // Scroll progress von 0 bis 1
+    const progress = Math.min(scrollY / maxScroll, 1);
+
+    // Welche Seite vorne? 3 Seiten, scroll 0..1 mappt auf 0..2
+    const pageIndex = Math.min(Math.floor(progress * (pages.length - 1)), pages.length - 2);
+    const localProgress = (progress * (pages.length - 1)) - pageIndex;
+
+    // console.log(pageIndex, localProgress.toFixed(2));
+
+    pages.forEach((page, i) => {
+      const fragments = page.querySelectorAll('.fragment');
+      if(i === pageIndex) {
+        // aktuelle Seite fragmentiert nach außen
+        page.style.opacity = 1 - localProgress;
+        page.style.transform = `translateZ(0px)`;
+        fragments.forEach((frag, idx) => {
+          // Position in Grid
+          const col = idx % cols;
+          const row = Math.floor(idx / cols);
+
+          // Abstand vom Zentrum - als Vektor
+          const offsetX = (col - (cols/2 - 0.5)) * 100;
+          const offsetY = (row - (rows/2 - 0.5)) * 100;
+
+          // Fragmente bewegen sich auseinander mit localProgress, in z und xy Achsen
+          const moveX = offsetX * localProgress * 2;
+          const moveY = offsetY * localProgress * 2;
+          const moveZ = localProgress * 600;
+
+          frag.style.transform = `translate3d(${moveX}px, ${moveY}px, ${moveZ}px) rotate(${localProgress * 360}deg)`;
+          frag.style.opacity = 1 - localProgress;
+        });
+      } else if (i === pageIndex + 1) {
+        // nächste Seite kommt von hinten nach vorne
+        page.style.opacity = localProgress;
+        page.style.transform = `translateZ(${-800 + localProgress * 800}px)`;
+        const fragments = page.querySelectorAll('.fragment');
+        fragments.forEach(frag => {
+          frag.style.transform = `translate3d(0,0,0) rotate(0deg)`;
+          frag.style.opacity = 1;
+        });
+      } else {
+        // andere Seiten sind unsichtbar und hinten
+        page.style.opacity = 0;
+        page.style.transform = `translateZ(-1600px)`;
+        const fragments = page.querySelectorAll('.fragment');
+        fragments.forEach(frag => {
+          frag.style.transform = `translate3d(0,0,0) rotate(0deg)`;
+          frag.style.opacity = 1;
+        });
+      }
+    });
   });
+
+  // Initial setzen, falls Scroll schon unten
+  window.dispatchEvent(new Event('scroll'));
 </script>
 </body>
 </html>
